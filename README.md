@@ -1,52 +1,17 @@
-# Global Dream — Gia · прототип 3D-прогулки
+# Global Dream — Interactive Experience
 
-Сайт-прогулка по шести мирам виллы у озера с пузырями-порталами и слоем Gia.
+An interactive 3D web experience developed as part of the Global Dream concept.
 
-**Режим по умолчанию — панорамы 8K:** каждый мир показан своей 360°-панорамой из точки съёмки (чётко, как на утверждённых картинках). Осматриваться можно на 360°, мир сам медленно поворачивается; ходить нельзя. 3D-миры (сплаты) — по адресу `?mode=splat`, для сравнения.
+The project combines immersive environments, custom visual design, interactive navigation, and the GIA digital assistant.
 
-Мир в пузыре меняется только по клику на пузырь (вход) или по кнопкам меню внизу — колесо, свайп и «проход сквозь пузырь» отключены.
-Основа — [Splat Portals](https://github.com/Simam-Digital-Ltd/splat-portals) (MIT, Simam Digital): один `index.html`, Three.js 0.180 + Spark 2.2, без сборки.
+**Status:** Work in progress. Private development project.
 
-## Запуск у себя
-Нужен любой локальный сервер (просто открыть файл двойным щелчком не получится):
-- VS Code: расширение **Live Server** → правый клик по `index.html` → *Open with Live Server*;
-- или в терминале в этой папке: `npx serve .` и открыть адрес, который он покажет.
+All original visual assets, content, and custom design elements are reserved by their respective rights holders.
 
-## Публикация на GitHub Pages
-1. Создайте репозиторий и загрузите в него всё содержимое папки (включая `worlds/`, `pano/`, `gia/` и файл `.nojekyll`).
-2. Settings → Pages → Source: *Deploy from a branch*, ветка `main`, папка `/ (root)`.
-3. Через минуту-две сайт будет по адресу `https://<имя>.github.io/<репозиторий>/`.
-Самый большой файл — 9,5 МБ (лимит GitHub — 100 МБ), Git LFS не нужен.
+---
 
-## Что где лежит
-| Путь | Что это |
-| --- | --- |
-| `index.html` | Весь сайт: 3D, пузыри, слой Gia, стили |
-| `worlds.json` | Миры и **все тексты**: заголовки, тексты у пузырей, окна Gia, точки внимания, полный текст глав |
-| `pano/*-8k.webp` | Миры-панорамы 7680×3840 для компьютера (основной режим) |
-| `pano/*.webp` | Панорамы 4096×2048 для телефона |
-| `worlds/*.sog` | 3D-миры (сплаты) для режима `?mode=splat`; если он не нужен, папку можно удалить |
-| `gia/` | Видео Gia без фона: WebM с прозрачностью (Chrome, Firefox, Android) и MP4 «картинка + маска» (Safari, iPhone) |
+### Credits & License
 
-## Как поменять текст
-Все тексты — в `worlds.json`. У каждого мира:
-- `title` — заголовок при входе (`eyebrow`, `h`, `lead`);
-- `bubbles` — пузыри: `to` (куда ведёт), `side` (−1 слева, 1 справа), `text` (текст у пузыря); `label` у мира — подпись под пузырём, который в него ведёт;
-- `gia` — окно Gia в ключевой момент; `chapter` — полный текст главы по кнопке «Explore …»;
-- `points` — точки внимания: `lon` — направление в градусах (0 — куда смотришь при входе, плюс — вправо);
-- `finale` — финальное окно (Что дальше); ссылка кнопки Meet Gia — `finale.button.href` (сейчас `#waitlist`, поставьте адрес листа ожидания).
+This project incorporates elements based on [Splat Portals](https://github.com/Simam-Digital-Ltd/splat-portals) by Simam Digital, licensed under the MIT License.
 
-## Параметры адреса
-| Параметр | Что делает |
-| --- | --- |
-| `?debug` | Строка внизу: мир, направление взгляда `lon`, позиция. Клавиша **C** копирует положение камеры (для расстановки точек и пузырей) |
-| `?mode=splat` | 3D-миры вместо панорам (можно ходить, но картинка мягче) |
-| `?idle=off` | Без автоповорота: пузыри стоят на месте, как в оригинале |
-| `?spin=6` | Скорость автоповорота, градусов в секунду |
-| `?idlems=8000` | Через сколько мс без касаний снова начинается поворот |
-| `?only=2` | Открыть сразу мир по номеру (0 Галерея, 1 Дом, 2 Финансы, 3 Переезд, 4 Business, 5 Что дальше) |
-| `?quality=light` | Качество: `light`, `balanced`, `high`, `full` (по умолчанию подстраивается само) |
-| `?stats` | Частота кадров |
-
-## Лицензия
-Код основы — MIT, © Simam Digital (файл `LICENSE` сохранён). Миры, видео и тексты — Global Dream.
+The original MIT license and copyright notice are retained in the `LICENSE` file.
