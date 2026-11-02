@@ -86,6 +86,7 @@ body { font-family: Inter, system-ui, "Segoe UI", sans-serif; }
 .plabel { background: var(--cream); border: 1px solid var(--edge); color: var(--ink); font-size: 13px; font-weight: 500; padding: 8px 15px; margin-top: 10px; box-shadow: 0 8px 24px rgba(60, 40, 20, .14); }
 .plabel small { display: none; }
 .plabel.word { font: 600 26px/1.1 "Cormorant Garamond", Georgia, serif; padding: 8px 20px; }
+.plabel.pair { white-space: normal; max-width: 44vw; width: max-content; text-align: center; }   /* the two bubbles on a phone: labels wrap to two lines */
 #load { background: #E9E1D4 center / cover no-repeat; }
 #load .in { background: var(--cream); color: var(--ink); padding: 26px 30px; border-radius: 24px; border: 1px solid var(--edge); box-shadow: var(--shadow); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
 #load .in b { letter-spacing: .2em; font-size: 13px; }
@@ -98,24 +99,36 @@ body { font-family: Inter, system-ui, "Segoe UI", sans-serif; }
 #wtitle h1 { margin: 0; font-size: 36px; line-height: 1.05; }
 #wtitle h1.hero { font-size: 64px; letter-spacing: .06em; }
 #wtitle p { margin: 0; font-size: 15px; line-height: 1.5; color: #3F352E; }
+/* everything the world says lives in the title card: fixed from arrival to the next world; past the dock's top it scrolls inside */
+#wtitle { max-height: calc(100vh - 98px - 86px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); }
+#wtitle > * { flex: none; }
+#wtitle .wbody { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgba(43, 36, 32, .2) transparent; display: flex; flex-direction: column; gap: 12px; }
+#wtitle .wbody.fade { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 44px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 44px), transparent); }
+.wsec { border-top: 1px solid rgba(43, 36, 32, .12); padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.wsec b { font: 600 22px/1.1 "Cormorant Garamond", Georgia, serif; }
+.wsec span { font-size: 14px; line-height: 1.45; color: #4A3F37; }
+.wsec .tags { justify-content: flex-start; }
+.wsteps { flex-direction: row; flex-wrap: wrap; gap: 6px 4px; align-items: center; }
+.wsteps i { font-style: normal; font-size: 13px; font-weight: 500; padding: 7px 12px; border-radius: 999px; background: rgba(43, 36, 32, .06); color: var(--ink2); }
+.wsteps em { font-style: normal; color: var(--ink2); opacity: .6; }
+/* arrival, once per world: the card slides in from the top left, then the blocks one by one (--i), each heading starting in lake blue,
+   a wave of lake across the tags (--j) and the Move steps lighting up in turn; --t scales every time (0.7 on a phone) */
+#wtitle { --t: 1; }
+#wtitle.on { animation: wtIn calc(.9s * var(--t)) cubic-bezier(.2, .7, .2, 1) both; }
+#wtitle .wsec { --at: calc(.3s + var(--i) * .12s); animation: wsIn calc(.6s * var(--t)) ease-out calc(var(--at) * var(--t)) both; }
+#wtitle .wsec b { animation: wsInk calc(1.5s * var(--t)) ease-out calc(var(--at) * var(--t)) both; }
+#wtitle .tags i { animation: tagWave calc(1.25s * var(--t)) linear calc((var(--at) + .5s + var(--j) * .15s) * var(--t)) both; }
+#wtitle .wsteps i { animation: stepLit calc(.4s * var(--t)) ease-out calc((var(--at) + .5s + var(--j) * .35s) * var(--t)) both; }
+@keyframes wtIn { from { opacity: 0; transform: translate(-30px, -30px); } to { opacity: 1; transform: none; } }
+@keyframes wsIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes wsInk { from { color: var(--lake); } to { color: var(--ink); } }
+@keyframes tagWave { 0% { background-color: rgba(31, 110, 140, .1); color: var(--lake2); animation-timing-function: ease-out; } 20%, 52% { background-color: var(--lake); color: #fff; animation-timing-function: ease-in-out; } 100% { background-color: rgba(31, 110, 140, .1); color: var(--lake2); } }
+@keyframes stepLit { to { background-color: var(--lake); color: #fff; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .gbtn { align-self: flex-start; font: 600 14px Inter, sans-serif; color: #fff; background: var(--lake); border: none; text-decoration: none; padding: 13px 22px; border-radius: 999px; cursor: pointer; min-height: 44px; }
 .gbtn:hover { background: var(--lake2); }
-#btext { width: 300px; padding: 14px 18px; border-radius: 20px; display: flex; flex-direction: column; gap: 6px; transform: translateY(-50%); opacity: 0; transition: opacity .5s; pointer-events: none; }
-#btext.on { opacity: 1; }
-#btext b { font: 600 22px/1.12 "Cormorant Garamond", Georgia, serif; }
-#btext span { font-size: 14px; line-height: 1.45; color: #4A3F37; }
-#point, #point2 { left: 50%; top: calc(80px + env(safe-area-inset-top, 0px)); transform: translate(-50%, 8px); max-width: min(460px, calc(100% - 32px)); padding: 16px 22px; display: flex; flex-direction: column; gap: 8px; text-align: center; align-items: center; opacity: 0; transition: opacity .6s, transform .6s; pointer-events: none; }
-#point.on, #point2.on { opacity: 1; transform: translate(-50%, 0); }
-#point, #point2, #steps { transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out !important; }
-#point b, #point2 b { font: 600 24px/1.1 "Cormorant Garamond", Georgia, serif; }
-#point span, #point2 span { font-size: 14px; line-height: 1.45; color: #4A3F37; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .tags i { font-style: normal; font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 999px; background: rgba(31, 110, 140, .1); color: var(--lake2); }
-#steps { left: 50%; top: calc(80px + env(safe-area-inset-top, 0px)); transform: translate(-50%, 8px); padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 6px 4px; align-items: center; justify-content: center; max-width: min(760px, calc(100% - 32px)); opacity: 0; transition: opacity .6s, transform .6s; pointer-events: none; }
-#steps.on { opacity: 1; transform: translate(-50%, 0); }
-#steps i { font-style: normal; font-size: 13px; font-weight: 500; padding: 7px 12px; border-radius: 999px; background: rgba(43, 36, 32, .06); color: var(--ink2); transition: background .5s, color .5s; }
-#steps i.lit { background: var(--lake); color: #fff; }
-#steps em { font-style: normal; color: var(--ink2); opacity: .6; }
 /* Gia */
 #giaPill { right: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 14px; padding: 8px 20px 8px 8px; border-radius: 999px; cursor: pointer; border: 1px solid var(--edge); text-align: left; font: inherit; color: var(--ink); transition: opacity .4s; }
 #giaPill .av { position: relative; width: 64px; height: 64px; border-radius: 50%; overflow: hidden; background: #EDE3D3; flex: none; box-shadow: 0 0 0 3px var(--cream-solid), 0 0 0 5px rgba(31, 110, 140, .25); transition: box-shadow .5s; }
@@ -163,14 +176,21 @@ body.gia-open #giaPill, body.gia-open #giaPill::after { animation: none; } body.
 @media (max-width: 760px), (pointer: coarse) and (max-width: 900px) {
   .brandlogo { height: 38px; }
   #wtitle { top: calc(76px + env(safe-area-inset-top, 0px)); padding: 16px 18px; } #wtitle h1 { font-size: 26px; } #wtitle p.lead { display: none; } #wtitle h1.hero { font-size: 44px; } #wtitle p { font-size: 14px; }
+  #wtitle { max-height: min(34vh, calc(44vh - 90px)); gap: 8px; --t: .7; } #wtitle .wbody { gap: 8px; max-height: 40vh; transition: opacity .4s, max-height .4s, margin-top .4s; }
+  .plabel { white-space: normal; max-width: 44vw; width: max-content; text-align: center; }   /* bubble labels wrap to two lines, as for the pair */
+  body.gia-open #wtitle .wbody { opacity: 0; max-height: 0; margin-top: -8px; pointer-events: none; }   /* Gia open: the card keeps only the world's title */
+  .wsec { padding-top: 8px; gap: 6px; } .wsec b { font-size: 17.5px; } .wsec span { display: none; } .wsec span.solo { display: block; font-size: 13px; }
+  .wsteps { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; flex: none; } .wsteps i { font-size: 12px; padding: 5px 9px; white-space: nowrap; flex: none; }
   #giaPill { right: 12px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); padding: 6px; } #giaPill .t { display: none; } #giaPill .av { width: 56px; height: 56px; } #giaPill { --av: 56px; --avx: 6px; }
   #giaFig { height: 30vh; right: -6px; bottom: calc(52vh - 4px); z-index: 5; }
   #giaWin { left: 0; right: 0; bottom: 0; width: 100%; max-height: 56vh; border-radius: 28px 28px 0 0; }
   #giaWin.full { max-height: 90vh; }
-  #btext { width: 240px; } #hint { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+  #hint { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
   #dock { bottom: calc(10px + env(safe-area-inset-bottom, 0px)); } #worlds { overflow-x: auto; } #worlds button { padding: 10px 12px; }
 }
-@media (prefers-reduced-motion: reduce) { #giaBody > *, #wtitle, #point, #steps, #giaWin, #giaFig { transition: none; } }
+@media (prefers-reduced-motion: reduce) { #giaBody > *, #wtitle, #giaWin, #giaFig { transition: none; }
+  #wtitle.on, #wtitle .wsec { animation: fadeIn .3s both; } #wtitle .wsec b, #wtitle .tags i, #wtitle .wsteps i { animation: none; }
+  #wtitle .wsteps i { background-color: var(--lake); color: #fff; } }
 </style>
 <script type="importmap">
 { "imports": {
@@ -901,6 +921,16 @@ function portalAt(x, y) {   // the bubble under a screen point, nearest first
   }
   return best;
 }
+// Global Dream: two bubbles on a phone sit side by side under the title card, k times smaller. A bubble k times smaller is the same
+// bubble seen from 1/k times farther away, so it is placed there: the world inside, the sparks, the click and the step-in all scale alike
+function pairAt(side, ang) {
+  const tv = Math.tan(THREE.MathUtils.degToRad(35)), th = tv * innerWidth / innerHeight;   // the resting 70° view
+  const r0 = (0.74 / 2.6 / tv) * innerHeight / 2, k = Math.min(0.55, 0.2 * innerWidth / r0), r = r0 * k;   // a normal bubble's radius on screen; two must fit across
+  const card = 76 + Math.min(0.34 * innerHeight, 0.44 * innerHeight - 90);   // the title card at its tallest
+  const yc = (card + 12 + r + innerHeight - 212 - 1.15 * r) / 2, xc = innerWidth * (side < 0 ? 0.27 : 0.73);   // between the card and the label's room above Gia's button
+  const d = new THREE.Vector3((xc / innerWidth * 2 - 1) * th, (1 - yc / innerHeight * 2) * tv, -1).normalize().applyEuler(new THREE.Euler(pitch, ang, 0, "YXZ"));
+  return pos.clone().addScaledVector(d, 2.6 / k);
+}
 let drag = null;
 addEventListener("pointerdown", () => ensureAudio(), { once: true }); addEventListener("keydown", () => ensureAudio(), { once: true }); addEventListener("wheel", () => ensureAudio(), { once: true });
 canvas.addEventListener("pointerdown", (e) => { GD.touch(); GD.closeGia(); camT.fling = 0; camT.v = 0; camT.lt = performance.now(); drag = { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, P: portalAt(e.clientX, e.clientY), swiped: false, t0: performance.now(), moved: false, walk: false }; canvas.setPointerCapture(e.pointerId); stopTour(); });
@@ -1085,7 +1115,7 @@ if (STORY) {
 
 // ---------- Global Dream: scenario layer (titles, bubble texts, attention points, Gia window, idle turning) ----------
 const GD = (() => {
-  const S = { entered: 0, lastInput: performance.now(), titleT: 0, titleStage: 0, seen: {}, finaleShown: false, cycle: null, cycleDone: {}, visits: {}, point: null, pointT: 0, pointShown: null, focusT: 0, idleK: 0 };
+  const S = { entered: 0, lastInput: performance.now(), titleT: 0, titleStage: 0, seen: {}, finaleShown: false, cycle: null, cycleDone: {}, visits: {}, focusT: 0, idleK: 0 };
   const W = () => WORLDS[here], ID = (i) => WORLDS[i].id;
   const ROT = THREE.MathUtils.degToRad(+(Q.get("spin") || 6));                 // idle turning, rad/s (about 6°/s: one turn a minute), clockwise
   const IDLE_MS = +(Q.get("idlems") || 8000), IDLE_ON = Q.get("idle") !== "off";   // ?idle=off: behaves like the original, no turning, bubbles stay put              // no input for this long: the view starts turning again
@@ -1116,10 +1146,6 @@ const GD = (() => {
   const ui = {};
   function build() {
     ui.title = el("div", "gcard"); ui.title.id = "wtitle"; document.body.append(ui.title);
-    ui.btext = el("div", "gcard"); ui.btext.id = "btext"; document.body.append(ui.btext);
-    ui.point = el("div", "gcard"); ui.point.id = "point"; document.body.append(ui.point);
-    ui.point2 = el("div", "gcard"); ui.point2.id = "point2"; document.body.append(ui.point2); ui.capEl = [ui.point, ui.point2]; ui.capK = 0;
-    ui.steps = el("div", "gcard"); ui.steps.id = "steps"; document.body.append(ui.steps);
     ui.fig = el("div"); ui.fig.id = "giaFig"; ui.fig.append(giaVideo("gia/gia-idle.webm", "gia/gia-idle-stacked.mp4", "gia/gia-poster.webp")); document.body.append(ui.fig);
     ui.pill = el("button", "gcard"); ui.pill.id = "giaPill"; ui.pill.setAttribute("aria-label", "Meet Gia");
     const av = el("span", "av"); av.append(giaVideo("gia/gia-avatar.webm", "gia/gia-avatar-stacked.mp4", "gia/gia-avatar-poster.webp"));
@@ -1129,37 +1155,54 @@ const GD = (() => {
     ui.win.innerHTML = `<header><span class="eyebrow">Gia</span><button class="x" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header><div id="giaBody"></div>`;
     ui.body = ui.win.querySelector("#giaBody"); ui.win.querySelector(".x").onclick = closeGia; document.body.append(ui.win);
     addEventListener("keydown", (e) => { if (e.code === "Escape" && document.body.classList.contains("gia-open")) closeGia(); });
+    document.fonts?.ready.then(() => fadeTitle());
     $("hint").textContent = PANO ? (PHONE ? "Drag to look" : "Drag to look around") : PHONE ? "Drag to look · Hold to walk" : "Drag to look around · Hold to walk";
     if (DEBUG) { ui.dbg = el("div", null); ui.dbg.style.cssText = "position:fixed;z-index:9;left:10px;bottom:70px;font:12px ui-monospace,monospace;color:#fff;background:#0009;padding:4px 8px;border-radius:6px"; document.body.append(ui.dbg); }
   }
   // ----- input: anything you do stops the idle turning for a while -----
   function touch() { S.lastInput = performance.now(); }
-  // ----- world title -----
+  // ----- world title, and under it everything the world says: bubble texts, the Gallery cycle, captions, the Move steps -----
+  function worldBlocks() {   // --i / --j: each block's and each tag's or step's place in line, for the CSS delays of the arrival accents
+    const w = W(), sec = (h, p, tags) => `${h ? `<b>${esc(h)}</b>` : ""}${p ? `<span${h ? "" : ` class="solo"`}>${esc(p)}</span>` : ""}${tags ? `<div class="tags">${tags.map((t, j) => `<i style="--j:${j}">${esc(t)}</i>`).join("")}</div>` : ""}`;
+    const out = (w.bubbles || []).filter((b) => b.text).map((b) => sec(b.text.h, b.text.p));
+    if (w.cycle) out.push(sec(w.cycle.intro), sec(w.cycle.after.h, w.cycle.after.p));
+    for (const p of w.points || []) out.push(sec(p.h, p.p, p.tags));
+    const html = out.map((s, i) => `<div class="wsec" style="--i:${i}">${s}</div>`);
+    if (w.steps) html.push(`<div class="wsec wsteps" style="--i:${html.length}">${w.steps.items.map((x, j) => `<i style="--j:${j}">${esc(x)}</i>`).join("<em>→</em>")}</div>`);
+    return html.length ? `<div class="wbody">${html.join("")}</div>` : "";
+  }
+  function setTitle(html) {
+    ui.title.innerHTML = html + worldBlocks();
+    const b = ui.title.querySelector(".wbody"); if (b) { b.onscroll = fadeTitle; fadeTitle(); }
+  }
+  function fadeTitle() {   // the soft fade at the bottom only while there is more to scroll to
+    const b = ui.title.querySelector(".wbody"); if (b) b.classList.toggle("fade", b.scrollHeight - b.clientHeight - b.scrollTop > 2);
+  }
   function showTitle() {
     const T = W().title, g = ID(here) === "gallery" && !S.visits.gallery;
-    ui.title.innerHTML = g ? `<h1 class="serif hero">${esc(T.h)}</h1><p>${esc(T.lead)}</p>`
-      : `${T.eyebrow ? `<div class="eyebrow">${esc(T.eyebrow)}</div>` : ""}<h1 class="serif">${esc(T.h)}</h1>${T.lead ? `<p>${esc(T.lead)}</p>` : ""}`;
-    ui.title.classList.add("on"); S.titleT = performance.now(); S.titleStage = g ? 1 : 2; if (T.lead && !g) ui.title.querySelector("p")?.classList.add("lead");
+    setTitle(g ? `<h1 class="serif hero">${esc(T.h)}</h1><p>${esc(T.lead)}</p>`
+      : `${T.eyebrow ? `<div class="eyebrow">${esc(T.eyebrow)}</div>` : ""}<h1 class="serif">${esc(T.h)}</h1>${T.lead ? `<p class="lead">${esc(T.lead)}</p>` : ""}`);
+    ui.title.classList.remove("on"); void ui.title.offsetWidth; ui.title.classList.add("on");   // the card slides in from the top left again on every arrival
+    S.titleT = performance.now(); S.titleStage = g ? 1 : 2;
   }
   function heroStage2() {   // Gallery: GIA → Start with Gia. Talk. Explore. Plan. [Meet Gia]
     const T = W().title; S.titleStage = 3;
-    ui.title.innerHTML = `<h1 class="serif">${esc(T.h2)}</h1><p>${esc(T.lead2)}</p><button class="gbtn">${esc(T.cta)}</button>`;
-    ui.title.querySelector("button").onclick = () => openGia(); S.titleT = performance.now();
+    setTitle(`<h1 class="serif">${esc(T.h2)}</h1><p>${esc(T.lead2)}</p><button class="gbtn">${esc(T.cta)}</button>`);
+    ui.title.querySelector("button").onclick = () => openGia(); S.titleT = performance.now(); if (document.body.classList.contains("gia-open")) fitWin();
   }
   const hideTitle = () => ui.title.classList.remove("on");
   // ----- entering a world -----
   function onEnter() {
     touch(); S.entered = performance.now(); S.lastInput = performance.now() - IDLE_MS + 6000;   // the view starts turning ~6 s after you arrive
-    closeGia(true); ui.point.classList.remove("on"); ui.point2.classList.remove("on"); ui.steps.classList.remove("on"); S.cycle = null; S.focusT = 0; S.point = null; S.cap = null; S.capT = 0; S.stepsLit = 0;
+    closeGia(true); S.cycle = null; S.focusT = 0;
     showTitle(); S.visits[ID(here)] = (S.visits[ID(here)] || 0) + 1;
     ui.pill.classList.toggle("new", !S.seen[ID(here)] && !!W().gia);
   }
   function spawnBubbles() {
-    const f = fwd(), right = new THREE.Vector3(-f.z, 0, f.x);
-    for (const b of W().bubbles || []) {
-      if (b.desktopOnly && PHONE) continue; const w = WIX(b.to); if (w < 0) continue;
-      const side = b.side || 0, at = pos.clone().addScaledVector(f, 2.6).addScaledVector(right, side * 1.15 + 0.35).add(new THREE.Vector3(0, -0.2, 0));
-      const P = makePortal(w, at); P.side = side;
+    const f = fwd(), right = new THREE.Vector3(-f.z, 0, f.x), list = (W().bubbles || []).filter((b) => !(b.desktopOnly && PHONE) && WIX(b.to) >= 0), pair = PHONE && list.length === 2;
+    for (const b of list) {
+      const side = b.side || 0, at = pair ? pairAt(side, yaw) : pos.clone().addScaledVector(f, 2.6).addScaledVector(right, side * 1.15 + 0.35).add(new THREE.Vector3(0, -0.2, 0));
+      const P = makePortal(WIX(b.to), at); P.side = side; if (pair) P.pair = side < 0 ? -1 : 1;
     }
   }
   // ----- Gia window -----
@@ -1212,13 +1255,19 @@ const GD = (() => {
     const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
     return Math.atan(((xc - innerWidth / 2) / (innerWidth / 2)) * tanH);
   }
-  function fitWin() {
-    if (PHONE) { ui.win.style.maxHeight = ""; return; }
-    const t = ui.title.getBoundingClientRect(), r = ui.win.getBoundingClientRect(), overlapX = ui.title.classList.contains("on") && r.left < t.right + 16;
+  const MOBILE = matchMedia("(max-width: 760px), (pointer: coarse) and (max-width: 900px)");
+  function fitWin() {   // Gia's window under the title card when they share a column; a tall card gives up room (it scrolls) so the window keeps 260 px
+    ui.title.style.maxHeight = "";
+    if (PHONE || MOBILE.matches) { ui.win.style.maxHeight = ""; fadeTitle(); return; }
+    let t = ui.title.getBoundingClientRect(); const r = ui.win.getBoundingClientRect(), overlapX = ui.title.classList.contains("on") && r.left < t.right + 16;
+    if (overlapX && document.body.classList.contains("gia-open") && innerHeight - (t.bottom + 16) - 92 < 260) {
+      ui.title.style.maxHeight = Math.max(140, innerHeight - 92 - 260 - 16 - t.top) + "px"; t = ui.title.getBoundingClientRect();
+    }
     ui.win.style.maxHeight = overlapX ? Math.max(260, innerHeight - (t.bottom + 16) - 92) + "px" : "";
+    fadeTitle();
   }
   addEventListener("resize", () => fitWin());
-  function closeGia(silent) { document.body.classList.remove("gia-open"); clearTimeout(S.fillT); if (!silent) touch(); }
+  function closeGia(silent) { document.body.classList.remove("gia-open"); clearTimeout(S.fillT); if (ui.title.style.maxHeight) { ui.title.style.maxHeight = ""; fadeTitle(); } if (!silent) touch(); }
   function action(a) {
     if (a === "chapter") { ui.win.classList.add("full"); fill(chapterBlocks(W().chapter || [])); }
     else if (a === "cycle") { closeGia(); startCycle(); }
@@ -1260,43 +1309,13 @@ const GD = (() => {
     const inView = F && !F.expand && F.open > 0.6 && (() => { const c = F.pos.clone().project(camera); return c.z < 1 && Math.abs(c.x) < 0.6 && Math.abs(c.y) < 0.8; })();
     S.focusT = inView ? S.focusT + dt : 0;
     // Gallery: the cycle starts by itself if you keep the bubble in view
-    // bubble text above the bubble in focus
-    let bt = null;
-    if (F && inView && !F.loading) {
-      if (S.cycle && w.cycle) bt = S.cycle.stage === "intro" || S.cycle.stage === "words" ? { h: w.cycle.intro, p: "" } : { h: w.cycle.after.h, p: w.cycle.after.p };
-      else { const b = (w.bubbles || []).find((x) => x.to === ID(F.w)); if (b && !(w.finale && ID(F.w) === "gallery" && S.finaleShown && open)) bt = b.text; }
-    }
-    if (bt && !open && !(PHONE && (ui.point.classList.contains("on") || ui.steps.classList.contains("on")))) {
-      const c = F.pos.clone().project(camera), e = F.pos.clone().add(new THREE.Vector3(0.78 * Math.min(F.open, 1), 0, 0).applyQuaternion(camera.quaternion)).project(camera);
-      const cx = (c.x * 0.5 + 0.5) * innerWidth, cy = (-c.y * 0.5 + 0.5) * innerHeight, r = Math.abs((e.x - c.x) * 0.5 * innerWidth), bw = ui.btext.offsetWidth || 300;
-      let x = cx + r + 24; if (x + bw > innerWidth - 16) x = cx - r - 24 - bw; x = Math.max(16, Math.min(innerWidth - bw - 16, x));
-      ui.btext.style.left = x + "px"; ui.btext.style.top = Math.max(150, Math.min(innerHeight - 220, cy)) + "px";
-      const key = bt.h + "|" + bt.p; if (ui.btext.dataset.k !== key) { ui.btext.dataset.k = key; ui.btext.innerHTML = `<b>${esc(bt.h)}</b>${bt.p ? `<span>${esc(bt.p)}</span>` : ""}`; }
-      ui.btext.classList.add("on"); } else ui.btext.classList.remove("on");
+    // (bubble texts, captions and the Move steps are all in the title card, shown from arrival: nothing here follows the view)
     // bubble labels: the chapter name, or the word while the Gallery cycle runs
     for (const P of portals) { const word = S.cycle && S.cycle.stage === "words" && P === portals[0] ? S.cycle.word : null;
-      const txt = word || WORLDS[P.w].label; if (P.label.dataset.k !== txt) { P.label.dataset.k = txt; P.label.textContent = txt; P.label.classList.toggle("word", !!word); } }
-    // captions tied to places in the room (calm version): a caption appears when its place comes into view,
-    // then stays until the turn reaches the next place; it stays at least 12 s and the change is a slow 1.5 s cross-fade
-    const lon = lonNow(); let hit = null;
-    const caps = [...(w.points || [])]; if (w.steps) caps.push(w.steps);
-    if (S.titleStage !== 1) for (const p of caps) { let d = Math.abs(lon - p.lon); d = Math.min(d, 360 - d); if (d < (p === w.steps ? 30 : 18)) { hit = p; break; } }
-    if (hit !== S.point) { S.point = hit; S.pointT = now; }
-    const want = hit && now - S.pointT > 1200 ? hit : null;
-    if (want && want !== S.cap && (!S.cap || now - S.capT > 12000)) {
-      S.cap = want; S.capT = now;
-      if (want === w.steps) { if (!ui.steps.innerHTML || ui.steps.dataset.w !== w.id) { ui.steps.innerHTML = w.steps.items.map((x) => `<i>${esc(x)}</i>`).join("<em>→</em>"); ui.steps.dataset.w = w.id; } S.stepsT = now - (S.stepsLit || 0) * 1500; }
-      else { ui.capK ^= 1; const c = ui.capEl[ui.capK]; c.innerHTML = `${want.h ? `<b>${esc(want.h)}</b>` : ""}${want.p ? `<span>${esc(want.p)}</span>` : ""}${want.tags ? `<div class="tags">${want.tags.map((t) => `<i>${esc(t)}</i>`).join("")}</div>` : ""}`; }
-    }
-    const capOn = !!S.cap && !open, isSteps = S.cap && S.cap === w.steps;
-    ui.steps.classList.toggle("on", capOn && isSteps);
-    ui.capEl.forEach((c, k) => c.classList.toggle("on", capOn && !isSteps && k === ui.capK));
-    // Move: the steps of the plan light up one every 1.5 s, and stay lit
-    if (w.steps && isSteps) { S.stepsLit = Math.max(S.stepsLit || 0, Math.min(w.steps.items.length, 1 + Math.floor((now - S.stepsT) / 1500)));
-      [...ui.steps.querySelectorAll("i")].forEach((x, i) => x.classList.toggle("lit", i < S.stepsLit)); }
+      const txt = word || WORLDS[P.w].label; if (P.label.dataset.k !== txt) { P.label.dataset.k = txt; P.label.textContent = txt; P.label.classList.toggle("word", !!word); P.label.classList.toggle("pair", !!P.pair); } }
     if (PANO && !busy()) pos.multiplyScalar(Math.exp(-dt * 2.5));
     for (const P of portals) { if (P.expand) continue; const d = pos.clone().sub(P.pos).setY(0), L = d.length(); if (L < 0.9 && L > 1e-4) pos.add(d.multiplyScalar((0.9 - L) / L)); }
-    if (ui.dbg) ui.dbg.textContent = `${ID(here)} · lon ${lon.toFixed(0)}° · pos ${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)} · ${S.idleK > 0 ? "idle" : "walk"}`;
+    if (ui.dbg) ui.dbg.textContent = `${ID(here)} · lon ${lonNow().toFixed(0)}° · pos ${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)} · ${S.idleK > 0 ? "idle" : "walk"}`;
   }
   return { build, touch, onEnter, spawnBubbles, frame, stopCycle, openGia, asideAngle, closeGia: () => { if (document.body.classList.contains("gia-open")) closeGia(); } };
 })();
@@ -1360,12 +1379,13 @@ renderer.setAnimationLoop((now) => {
       const toA = P.anchor.clone().sub(pos), dist = toA.length(), ang = Math.acos(THREE.MathUtils.clamp(toA.clone().setY(0).normalize().dot(f), -1, 1));
       {   // Global Dream: its place is a fixed angle from where you look (aside while Gia is open), always 2.6 m away
         const aside = document.body.classList.contains("gia-open") && !PHONE ? GD.asideAngle() : null;   // Gia open: centred in the free space left of her window
-        const off = aside !== null ? aside - (P.side === -1 ? 0.55 : 0) : P.side ? P.side * 0.34 + 0.2 : 0.13;   // two bubbles sit a little right, clear of the title card
+        const off = P.pair ? 0 : aside !== null ? aside - (P.side === -1 ? 0.55 : 0) : P.side ? P.side * 0.34 + 0.2 : 0.13;   // two bubbles sit a little right, clear of the title card
         let ta = yaw - off; if (P.ang === undefined) { P.ang = ta; P.angV = 0; }
         ta = P.ang + (((ta - P.ang) % 6.2832) + 9.4248) % 6.2832 - 3.1416;
         [P.ang, P.angV] = damp(P.ang, ta, P.angV, 0.5, 2.2, dt);
         P.lift = (P.lift ?? 0) + ((aside !== null ? -0.15 : 0) - (P.lift ?? 0)) * Math.min(1, dt * 3);
-        P.anchor.set(pos.x - Math.sin(P.ang) * 2.6, pos.y - 0.2 + P.lift, pos.z - Math.cos(P.ang) * 2.6);
+        if (P.pair) P.anchor.copy(pairAt(P.pair, P.ang));   // phone, two bubbles: smaller, side by side under the title card
+        else P.anchor.set(pos.x - Math.sin(P.ang) * 2.6, pos.y - 0.2 + P.lift, pos.z - Math.cos(P.ang) * 2.6);
       }
       const target = P.anchor.clone().add(new THREE.Vector3(Math.sin(t * 0.5 + P.seed) * 0.09, Math.sin(t * 0.9 + P.seed * 2) * 0.06, Math.cos(t * 0.4 + P.seed) * 0.09));
       P.vel.addScaledVector(target.clone().sub(P.pos), 9 * dt).multiplyScalar(Math.exp(-dt * 4.5));

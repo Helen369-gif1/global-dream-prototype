@@ -190,16 +190,11 @@
   "bubbles": [
    {
     "to": "move",
-    "side": 1,
-    "text": {
-     "h": "Turn the next step into a clear plan.",
-     "p": ""
-    }
+    "side": 1
    },
    {
     "to": "home",
     "side": -1,
-    "desktopOnly": true,
     "text": {
      "h": "Explore What Changes.",
      "p": "What if your housing costs change?"
