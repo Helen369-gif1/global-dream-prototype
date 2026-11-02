@@ -177,7 +177,7 @@ body.gia-open #giaPill, body.gia-open #giaPill::after { animation: none; } body.
   .brandlogo { height: 38px; }
   #wtitle { top: calc(76px + env(safe-area-inset-top, 0px)); padding: 16px 18px; } #wtitle h1 { font-size: 26px; } #wtitle p.lead { display: none; } #wtitle h1.hero { font-size: 44px; } #wtitle p { font-size: 14px; }
   #wtitle { max-height: min(34vh, calc(44vh - 90px)); gap: 8px; --t: .7; } #wtitle .wbody { gap: 8px; max-height: 40vh; transition: opacity .4s, max-height .4s, margin-top .4s; }
-  .plabel { white-space: normal; max-width: 44vw; width: max-content; text-align: center; }   /* bubble labels wrap to two lines, as for the pair */
+  .plabel { white-space: normal; max-width: 56vw; width: max-content; text-align: center; }   /* bubble labels wrap to two lines, as for the pair */
   body.gia-open #wtitle .wbody { opacity: 0; max-height: 0; margin-top: -8px; pointer-events: none; }   /* Gia open: the card keeps only the world's title */
   .wsec { padding-top: 8px; gap: 6px; } .wsec b { font-size: 17.5px; } .wsec span { display: none; } .wsec span.solo { display: block; font-size: 13px; }
   .wsteps { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; flex: none; } .wsteps i { font-size: 12px; padding: 5px 9px; white-space: nowrap; flex: none; }
@@ -923,13 +923,28 @@ function portalAt(x, y) {   // the bubble under a screen point, nearest first
 }
 // Global Dream: two bubbles on a phone sit side by side under the title card, k times smaller. A bubble k times smaller is the same
 // bubble seen from 1/k times farther away, so it is placed there: the world inside, the sparks, the click and the step-in all scale alike
-function pairAt(side, ang) {
-  const tv = Math.tan(THREE.MathUtils.degToRad(35)), th = tv * innerWidth / innerHeight;   // the resting 70° view
-  const r0 = (0.74 / 2.6 / tv) * innerHeight / 2, k = Math.min(0.55, 0.2 * innerWidth / r0), r = r0 * k;   // a normal bubble's radius on screen; two must fit across
-  const card = 76 + Math.min(0.34 * innerHeight, 0.44 * innerHeight - 90);   // the title card at its tallest
-  const yc = (card + 12 + r + innerHeight - 212 - 1.15 * r) / 2, xc = innerWidth * (side < 0 ? 0.27 : 0.73);   // between the card and the label's room above Gia's button
+function screenAt(xc, yc, k, ang) {   // the point that shows at screen (xc, yc) in the resting 70° view, as far away as makes a bubble k times smaller
+  const tv = Math.tan(THREE.MathUtils.degToRad(35)), th = tv * innerWidth / innerHeight;
   const d = new THREE.Vector3((xc / innerWidth * 2 - 1) * th, (1 - yc / innerHeight * 2) * tv, -1).normalize().applyEuler(new THREE.Euler(pitch, ang, 0, "YXZ"));
   return pos.clone().addScaledVector(d, 2.6 / k);
+}
+const bubbleR0 = () => (0.74 / 2.6 / Math.tan(THREE.MathUtils.degToRad(35))) * innerHeight / 2;   // a normal bubble's radius on screen, px
+function pairAt(side, ang) {
+  const r0 = bubbleR0(), k = Math.min(0.55, 0.2 * innerWidth / r0), r = r0 * k;   // two must fit across
+  const card = 76 + Math.min(0.34 * innerHeight, 0.44 * innerHeight - 90);   // the title card at its tallest
+  const yc = (card + 12 + r + innerHeight - 212 - 1.15 * r) / 2, xc = innerWidth * (side < 0 ? 0.27 : 0.73);   // between the card and the label's room above Gia's button
+  return screenAt(xc, yc, k, ang);
+}
+// one bubble on a phone: in the middle, between the title card and its label's room 12 px above Gia's button and the hint; smaller only if it must be.
+// Measured once per world (and again on resize) so it keeps its size and place while the card folds for Gia or the label shows the Gallery words
+function soloAt(P, ang) {
+  if (!P.soloG || P.soloG.w !== innerWidth || P.soloG.h !== innerHeight) {
+    const t = $("wtitle"), cardB = t.offsetTop + t.offsetHeight, lim = Math.min($("giaPill").getBoundingClientRect().top, $("hint").getBoundingClientRect().top) - 12;
+    const r0 = bubbleR0(), lh = P.label.offsetHeight + 10, k = Math.min(1, (lim - cardB - 12 - lh) / (2.39 * r0)), r = r0 * k;   // the label hangs 1.15 r below the centre; 0.12 r each way for the sway
+    const yc = Math.max(cardB + 12 + 1.12 * r, Math.min(innerHeight / 2 + 0.1 * r0, lim - lh - 1.27 * r));
+    P.soloG = { w: innerWidth, h: innerHeight, k: Math.max(0.3, k), yc };
+  }
+  return screenAt(innerWidth / 2, P.soloG.yc, P.soloG.k, ang);
 }
 let drag = null;
 addEventListener("pointerdown", () => ensureAudio(), { once: true }); addEventListener("keydown", () => ensureAudio(), { once: true }); addEventListener("wheel", () => ensureAudio(), { once: true });
@@ -1189,6 +1204,7 @@ const GD = (() => {
     const T = W().title; S.titleStage = 3;
     setTitle(`<h1 class="serif">${esc(T.h2)}</h1><p>${esc(T.lead2)}</p><button class="gbtn">${esc(T.cta)}</button>`);
     ui.title.querySelector("button").onclick = () => openGia(); S.titleT = performance.now(); if (document.body.classList.contains("gia-open")) fitWin();
+    for (const P of portals) P.soloG = null;   // the card changed height: a lone bubble on a phone measures its room again
   }
   const hideTitle = () => ui.title.classList.remove("on");
   // ----- entering a world -----
@@ -1202,7 +1218,7 @@ const GD = (() => {
     const f = fwd(), right = new THREE.Vector3(-f.z, 0, f.x), list = (W().bubbles || []).filter((b) => !(b.desktopOnly && PHONE) && WIX(b.to) >= 0), pair = PHONE && list.length === 2;
     for (const b of list) {
       const side = b.side || 0, at = pair ? pairAt(side, yaw) : pos.clone().addScaledVector(f, 2.6).addScaledVector(right, side * 1.15 + 0.35).add(new THREE.Vector3(0, -0.2, 0));
-      const P = makePortal(WIX(b.to), at); P.side = side; if (pair) P.pair = side < 0 ? -1 : 1;
+      const P = makePortal(WIX(b.to), at); P.side = side; if (pair) P.pair = side < 0 ? -1 : 1; if (PHONE && list.length === 1) { P.solo = true; P.pos.copy(soloAt(P, yaw)); P.anchor.copy(P.pos); }
     }
   }
   // ----- Gia window -----
@@ -1379,12 +1395,13 @@ renderer.setAnimationLoop((now) => {
       const toA = P.anchor.clone().sub(pos), dist = toA.length(), ang = Math.acos(THREE.MathUtils.clamp(toA.clone().setY(0).normalize().dot(f), -1, 1));
       {   // Global Dream: its place is a fixed angle from where you look (aside while Gia is open), always 2.6 m away
         const aside = document.body.classList.contains("gia-open") && !PHONE ? GD.asideAngle() : null;   // Gia open: centred in the free space left of her window
-        const off = P.pair ? 0 : aside !== null ? aside - (P.side === -1 ? 0.55 : 0) : P.side ? P.side * 0.34 + 0.2 : 0.13;   // two bubbles sit a little right, clear of the title card
+        const off = P.pair || P.solo ? 0 : aside !== null ? aside - (P.side === -1 ? 0.55 : 0) : P.side ? P.side * 0.34 + 0.2 : 0.13;   // two bubbles sit a little right, clear of the title card
         let ta = yaw - off; if (P.ang === undefined) { P.ang = ta; P.angV = 0; }
         ta = P.ang + (((ta - P.ang) % 6.2832) + 9.4248) % 6.2832 - 3.1416;
         [P.ang, P.angV] = damp(P.ang, ta, P.angV, 0.5, 2.2, dt);
         P.lift = (P.lift ?? 0) + ((aside !== null ? -0.15 : 0) - (P.lift ?? 0)) * Math.min(1, dt * 3);
         if (P.pair) P.anchor.copy(pairAt(P.pair, P.ang));   // phone, two bubbles: smaller, side by side under the title card
+        else if (P.solo) P.anchor.copy(soloAt(P, P.ang));   // phone, one bubble: in the middle, clear of the card, Gia's button and the hint
         else P.anchor.set(pos.x - Math.sin(P.ang) * 2.6, pos.y - 0.2 + P.lift, pos.z - Math.cos(P.ang) * 2.6);
       }
       const target = P.anchor.clone().add(new THREE.Vector3(Math.sin(t * 0.5 + P.seed) * 0.09, Math.sin(t * 0.9 + P.seed * 2) * 0.06, Math.cos(t * 0.4 + P.seed) * 0.09));
